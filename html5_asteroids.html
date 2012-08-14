@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ASTEROIDS</title>
+
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+
+/*****
+ * 	Class
+ */
+function obj_vector(x,y)
+{
+	this.x = x;
+	this.y = y;
+}
+
+function math_sqr(x)
+{
+	return x*x;	
+}
+
+function eventWindowLoaded() {
+
+	canvasApp();	
+}
+
+function canvasApp()
+{
+
+	theCanvas = document.getElementById('canvas');
+  	if (!theCanvas || !theCanvas.getContext) {
+    		return;
+  	}
+  
+  	context = theCanvas.getContext('2d');
+	if (!context) {
+   	 	return;
+  	}
+
+	function init_ship() {
+
+		_ship = new obj_ship(FRAME_SIZE_W/2,FRAME_SIZE_H/2);
+	}
+	
+	function run_game() {
+		current_state_function();		
+	}
+
+	function init() {
+
+		init_ship();
+	
+		for (var i=0; i<NUM_ROIDS; i++)
+		{
+			_asteroids[i] = new obj_asteroid();
+			_asteroids[i].init(4);
+		}
+		
+		set_state(STATE_PLAY);
+		setInterval(run_game, intervalTime);
+	}
+
+	function run_play() {
+		
+		checkKeys();
+		updateShip();
+		updateAsteroids();
+		updateLasers();
+		checkCollisions();
+		renderScreen();	
+	}
+
+	function run_die() {
+		
+		//console.log("RUN DIE");
+
+		updateShip();
+		updateAsteroids();
+		updateLasers();
+		renderScreen();
+		
+		if (_ship.explosion.life > EXPLOSION_LIFE)
+		{
+			init_ship();
+			set_state(STATE_PLAY);
+		}
+	}
+
+	/*****
+	 * STATE FUNCTIONS
+	 */
+	function advance_state() {
+		
+		switch(current_state)
+		{
+			case STATE_TITLE:
+				break;
+			case STATE_PLAY:
+				current_state++;
+  				current_state_function = run_die();
+  				break;
+			case STATE_DIE:
+				break;
+			
+		}
+	}
+
+	function set_state(to_state) {
+		
+		current_state = to_state;
+		switch(to_state)
+		{
+			case STATE_PLAY:
+  				current_state_function = run_play;
+  				break;
+			case STATE_DIE:
+				console.log("SET CURRENT FUNCTION");
+  				current_state_function = run_die;
+				break;
+		}
+	}
+
+	/******
+	 * STATE SUPPORT FUNCTIONS
+	 */
+	function checkKeys() {
+
+		//check keys
+		if (keyPressList[38]==true){
+			_ship.thrust = true;
+			_ship.thrust_count++;
+
+			if (_ship.thrust_acceleration < SHIP_MAX_THRUST)	
+			{_ship.thrust_acceleration += SHIP_THRUST;}
+
+			var angleInRadians = (_ship.rotation - 90) * Math.PI / 180;
+			facingX=Math.cos(angleInRadians);
+			facingY=Math.sin(angleInRadians);
+			
+			_ship.vmove.x += _ship.thrust_acceleration * facingX;
+			_ship.vmove.y += _ship.thrust_acceleration * facingY;
+
+			speed = Math.sqrt(_ship.vmove.x * _ship.vmove.x + _ship.vmove.y * _ship.vmove.y);
+			//console.log(speed);
+
+		} else {
+			_ship.thrust = false;
+			_ship.thrust_count = 0;
+			_ship.thrust_acceleration = 0;
+		}
+
+		if (keyPressList[37]==true) {
+			//rotate counter-clockwise
+			_ship.rotate(-SHIP_ROTATIONAL_VELOCITY);
+		}
+		
+		if (keyPressList[39]==true) {
+			//rotate clockwise
+			_ship.rotate(SHIP_ROTATIONAL_VELOCITY);
+		}
+		
+		if (keyPressList[70]==true) {
+
+			if (!_ship.shooting)
+			{
+				_ship.shooting = true;
+				size = _lasers.length;
+				
+				if (size < 5)
+				{
+					_lasers[size] = new obj_laser();
+					_lasers[size].init();
+				}
+			}
+		}
+		else
+		{
+			_ship.shooting = false;
+		}
+	}
+
+	function updateShip()
+	{
+		_ship.update();
+	}
+	
+	function updateAsteroids()
+	{
+		for (var i=0; i<_asteroids.length; i++)
+		{
+			_asteroids[i].update();
+		}
+	}
+
+	function updateLasers()
+	{
+		for (var i=0; i<_lasers.length; i++)
+		{
+			if (!_lasers[i].update())
+			{
+				_lasers.splice(i,1);
+			}
+		}
+	}
+
+	function checkCollisions()
+	{
+ 		for (var i=0; i<_asteroids.length; i++)
+		{
+			if(_asteroids[i].checkShipCollision() == true)
+			{
+				set_state(STATE_DIE);
+			}
+			
+			if(_asteroids[i].checkLaserCollisions() == true)
+			{
+				cur_size = _asteroids[i].size;
+				cur_v = _asteroids[i].vloc;
+
+				_asteroids.splice(i,1);
+				
+				if (cur_size > 1)
+				{
+					n_size = cur_size / 2;
+					l = _asteroids.length;
+console.log("NEW size" + n_size + " length" + l);
+
+					_asteroids[l] = new obj_asteroid();
+					_asteroids[l].init(n_size,cur_v);
+
+					l = _asteroids.length;
+					_asteroids[l] = new obj_asteroid();
+					_asteroids[l].init(n_size,cur_v);
+				}
+
+			}
+		}
+	}
+
+	function renderScreen() {
+		
+		context.fillStyle = '#000000';
+  		context.fillRect(0, 0, FRAME_SIZE_W, FRAME_SIZE_H);
+  		
+		_ship.render();
+
+		for (var i=0; i<_asteroids.length; i++)
+		{
+			_asteroids[i].render();		
+		}
+		
+		for (var i=0; i<_lasers.length; i++)
+		{
+			_lasers[i].render();		
+		}
+
+	}
+
+	//Init Game
+	init();
+
+	//setInterval(current_state_function, intervalTime);
+
+	document.onkeydown=function(e){
+		
+		e=e?e:window.event;
+		keyPressList[e.keyCode]=true;
+	};
+	
+	document.onkeyup=function(e){
+
+		e=e?e:window.event;
+		keyPressList[e.keyCode]=false;
+	};
+
+}
+
+	const FRAME_RATE=40;
+	const FRAME_SIZE_W=600;
+	const FRAME_SIZE_H=400;
+	
+	const SHIP_ROTATIONAL_VELOCITY = 4.0;
+	const SHIP_THRUST = .01;
+	const SHIP_MAX_THRUST = .3;
+
+	const LASER_SPEED = 6;
+	
+	const STATE_TITLE = 0;
+	const STATE_PLAY = 1;
+	const STATE_DIE = 2;
+	
+	const NUM_ROIDS = 8;
+	const ROID_FULL_SIZE = 50.0;
+	const EXPLOSION_LIFE = 60;
+
+	var intervalTime= 1000 / FRAME_RATE;
+	var keyPressList = [];
+
+	//create object
+	var _ship = {};
+	var _asteroids = [];
+	var _lasers = [];
+	
+	//canvas objects
+	var theCanvas;
+	var context;
+
+	var state_functions = {};
+	var current_state_function;
+	
+
+</script> 
+
+<script type="text/javascript" src="html5_asteroids.explosion.js"></script>
+<script type="text/javascript" src="html5_asteroids.asteroid.js"></script>
+<script type="text/javascript" src="html5_asteroids.ship.js"></script>
+
+</head>
+<body>
+<div style="position: absolute; top: 5px; left: 5px;">
+<canvas id="canvas" width="800" height="600">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+</body>
+</html>
