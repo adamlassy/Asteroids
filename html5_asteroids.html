@@ -5,7 +5,7 @@
 <title>ASTEROIDS</title>
 
 <script type="text/javascript">
-window.addEventListener('load', eventWindowLoaded, false);	
+window.addEventListener('load', eventWindowLoaded, false);
 
 /*****
  * 	Class
@@ -51,15 +51,19 @@ function canvasApp()
 	function init() {
 
 		init_ship();
-	
+
 		for (var i=0; i<NUM_ROIDS; i++)
 		{
 			_asteroids[i] = new obj_asteroid();
 			_asteroids[i].init(4);
 		}
-		
+
 		set_state(STATE_PLAY);
 		setInterval(run_game, intervalTime);
+	}
+
+        function run_keurig() {
+
 	}
 
 	function run_play() {
@@ -268,7 +272,7 @@ console.log("NEW size" + n_size + " length" + l);
 		e=e?e:window.event;
 		keyPressList[e.keyCode]=true;
 	};
-	
+
 	document.onkeyup=function(e){
 
 		e=e?e:window.event;
@@ -278,19 +282,18 @@ console.log("NEW size" + n_size + " length" + l);
 }
 
 	const FRAME_RATE=40;
-	const FRAME_SIZE_W=600;
-	const FRAME_SIZE_H=400;
+	const FRAME_SIZE_W=800;
+	const FRAME_SIZE_H=600;
 	
 	const SHIP_ROTATIONAL_VELOCITY = 4.0;
 	const SHIP_THRUST = .01;
 	const SHIP_MAX_THRUST = .3;
 
 	const LASER_SPEED = 6;
-	
 	const STATE_TITLE = 0;
 	const STATE_PLAY = 1;
 	const STATE_DIE = 2;
-	
+
 	const NUM_ROIDS = 8;
 	const ROID_FULL_SIZE = 50.0;
 	const EXPLOSION_LIFE = 60;
@@ -318,8 +321,8 @@ console.log("NEW size" + n_size + " length" + l);
 <script type="text/javascript" src="html5_asteroids.ship.js"></script>
 
 </head>
-<body>
-<div style="position: absolute; top: 5px; left: 5px;">
+<body style="padding:0; margin:0;">
+<div style="position: absolute; top: 0px; left: 0px;">
 <canvas id="canvas" width="800" height="600">
  Your browser does not support the HTML 5 Canvas. 
 </canvas>
