@@ -117,6 +117,8 @@
 				context.translate(-voffset.x,-voffset.y);
 	
 				context.strokeStyle = '#ffffff';
+				context.lineWidth = 2;
+
 				context.beginPath();
 				context.moveTo(7,0); 
 				context.lineTo(0,22);

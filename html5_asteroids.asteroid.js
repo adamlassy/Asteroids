@@ -7,9 +7,11 @@
 		this.vmove = {};
 		this.speed = 0;
 		this.size;
+		this.rotation;
 
 		this.init = function(size,cur_v)
 		{
+			this.rotation = (Math.floor(Math.random()*360)) * Math.PI / 180;
 			this.speed = 1;
 			this.size = size;
 			this.radius = (size / 4) * ROID_FULL_SIZE;
@@ -91,14 +93,50 @@
 		
 			context.save(); //save current state in stack 
 			context.setTransform(1,0,0,1,0,0); // reset to identity
+			//context.rotate(this.rotation);
 				
 			//translate the canvas origin to the center of the player
 			context.translate(this.vloc.x-this.radius,this.vloc.y-this.radius);		
 
-			context.scale(this.size/4,this.size/4);
+			//context.scale(this.size/4,this.size/4);
 
 			context.strokeStyle = '#ffffff';
+			context.lineWidth = 2;
+
 			context.beginPath();
+			if (this.size == 1) {
+
+			context.moveTo(7,6); 
+			context.lineTo(8,2);
+			context.lineTo(15,1);
+			context.lineTo(17,6);
+			context.lineTo(22,7);
+			context.lineTo(24,13);
+			context.lineTo(17,13);
+			context.lineTo(19,20);
+			context.lineTo(9,23);
+			context.lineTo(5,15);
+			context.lineTo(2,14);
+			context.lineTo(0,9);
+			context.lineTo(7,6);
+
+			} else if (this.size == 2) {
+
+			context.moveTo(15,2); 
+			context.lineTo(25,1);
+			context.lineTo(47,9);
+			context.lineTo(31,17);
+			context.lineTo(48,28);
+			context.lineTo(37,47);
+			context.lineTo(32,40);
+			context.lineTo(8,48);
+			context.lineTo(1,38);
+			context.lineTo(1,11);
+			context.lineTo(21,12);
+			context.lineTo(15,2);
+
+			} else {
+
 			context.moveTo(4,37); 
 			context.lineTo(29,47);
 			context.lineTo(6,66);
@@ -112,6 +150,8 @@
 			context.lineTo(42,2);
 			context.lineTo(15,18);
 			context.lineTo(4,37);
+			}
+
 			context.stroke();
 			context.closePath();
 
